@@ -1,5 +1,5 @@
 from django.test import TestCase
-from django.contrib.auth.models import User
+
 from django.contrib.sites.models import Site
 from django.template import Template
 from django.template.response import SimpleTemplateResponse
@@ -12,8 +12,6 @@ from adzone.templatetags.adzone_tags import random_zone_ad, random_category_ad
 
 
 # Helper functions to help setting up the tests
-user = lambda: User.objects.create_user('test', 'test@example.com', 'secret')
-
 
 def datenow():
     return timezone.now()
@@ -23,7 +21,7 @@ def create_objects():
     """ Simple helper to create advertiser, category and zone """
     advertiser = Advertiser.objects.create(
         company_name='Advertiser Name 1',
-        website='http://example.com/', user=user())
+        website='http://example.com/')
 
     category = AdCategory.objects.create(
         title='Internet Services',
@@ -35,12 +33,14 @@ def create_objects():
         slug='sidebar',
         description='Sidebar Zone Description')
 
-    return advertiser, category, adzone
+    site = Site.objects.create(domain="http://2.example.com", name="Example site")
+
+    return advertiser, category, adzone, site
 
 
 def create_advert():
     """ Simple helper to create a single ad """
-    advertiser, category, zone = create_objects()
+    advertiser, category, zone, site = create_objects()
     ad = AdBase.objects.create(
         title='Ad Title',
         url='www.example.com',
@@ -48,7 +48,7 @@ def create_advert():
         category=category,
         zone=zone,
     )
-    ad.sites = [Site.objects.get_current()]
+    ad.sites = [site]
     return ad
 
 
@@ -56,16 +56,11 @@ def create_advert():
 class AdvertiserTestCase(TestCase):
 
     def test_model(self):
-        Advertiser(
-            company_name='Advertiser Name 1',
-            website='http://example.com/',
-            user=user())
+        Advertiser(company_name='Advertiser Name 1', website='http://example.com/')
 
     def test_get_website_url(self):
-        advertiser = Advertiser(
-            company_name='Advertiser Name 1',
-            website='http://example.com/',
-            user=user())
+        advertiser = Advertiser(company_name='Advertiser Name 1',
+                                website='http://example.com/')
 
         self.assertEqual(
             'http://example.com/',
@@ -95,7 +90,7 @@ class AdBaseTestCase(TestCase):
     urls = 'adzone.urls'
 
     def test_model(self):
-        advertiser, category, zone = create_objects()
+        advertiser, category, zone, site = create_objects()
         AdBase(
             title='Ad Title',
             url='www.example.com',
@@ -117,7 +112,8 @@ class AdManagerTestCase(TestCase):
 
     def setUp(self):
         # Create two categories and two adverts
-        advertiser, category, zone = create_objects()
+        advertiser, category, zone, site = create_objects()
+        self.site = site
         category2 = AdCategory.objects.create(
             title='Category 2',
             slug='category-2',
@@ -137,20 +133,22 @@ class AdManagerTestCase(TestCase):
             category=category2,
             zone=zone
         )
-        ad1.sites = [Site.objects.get_current()]
-        ad2.sites = [Site.objects.get_current()]
+        ad1.sites = [site]
+        ad2.sites = [site]
 
     def test_manager_exists(self):
         AdManager
 
     def test_get_random_ad(self):
-        advert = AdBase.objects.get_random_ad('sidebar')
-        self.assertIn(advert.id, [1, 2])
+        with self.settings(SITE_ID=self.site.id):
+            advert = AdBase.objects.get_random_ad('sidebar')
+            self.assertIn(advert.id, [1, 2])
 
     def test_get_random_ad_by_category(self):
-        advert = AdBase.objects.get_random_ad('sidebar',
-                                              ad_category='category-2')
-        self.assertIn(advert.id, [2])
+        with self.settings(SITE_ID=self.site.id):
+            advert = AdBase.objects.get_random_ad('sidebar',
+                                                  ad_category='category-2')
+            self.assertIn(advert.id, [2])
 
 
 class AdImpressionTestCase(TestCase):
@@ -178,9 +176,10 @@ class AdClickTestCase(TestCase):
 class TemplateTagsTestCase(TestCase):
 
     def test_random_zone_ad_creates_impression(self):
-        create_advert()
-        random_zone_ad({'from_ip': '127.0.0.1'}, 'sidebar')
-        self.assertEqual(AdImpression.objects.all().count(), 1)
+        ad = create_advert()
+        with self.settings(SITE_ID=ad.sites.all()[0].pk):
+            random_zone_ad({'from_ip': '127.0.0.1'}, 'sidebar')
+            self.assertEqual(AdImpression.objects.all().count(), 1)
 
     def test_random_zone_ad_renders(self):
         template = Template("{% load adzone_tags %}{% random_zone_ad 'sidebar' %}")
@@ -189,10 +188,11 @@ class TemplateTagsTestCase(TestCase):
         self.assertTrue(response.is_rendered)
 
     def test_random_category_ad_creates_impression(self):
-        create_advert()
-        random_category_ad(
-            {'from_ip': '127.0.0.1'}, 'sidebar', 'internet-services')
-        self.assertEqual(AdImpression.objects.all().count(), 1)
+        ad = create_advert()
+        with self.settings(SITE_ID=ad.sites.all()[0].id):
+            random_category_ad(
+                {'from_ip': '127.0.0.1'}, 'sidebar', 'internet-services')
+            self.assertEqual(AdImpression.objects.all().count(), 1)
 
     def test_random_category_ad_renders(self):
         template = Template("{% load adzone_tags %}{% random_category_ad 'sidebar' 'internet-services' %}")

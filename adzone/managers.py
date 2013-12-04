@@ -1,4 +1,5 @@
 import datetime
+import random
 
 from django.contrib.sites.models import Site
 
@@ -26,8 +27,10 @@ class AdManager(models.Manager):
                                                           'bannerad')
         if ad_category:
             qs = qs.filter(category__slug=ad_category)
-        try:
-            ad = qs.order_by('?')[0]
-        except IndexError:
+
+        # Much faster than .order_by('?') is to do two queries.
+        count = qs.count()
+        if count == 0:
             return None
+        ad = qs[random.randint(0, count - 1)]
         return ad
