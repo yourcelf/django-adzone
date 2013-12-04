@@ -14,8 +14,7 @@ from adzone.models import *
 
 class AdvertiserAdmin(admin.ModelAdmin):
     search_fields = ['company_name', 'website']
-    list_display = ['company_name', 'website', 'user']
-    raw_id_fields = ['user']
+    list_display = ['company_name', 'website']
 
 
 class AdCategoryAdmin(admin.ModelAdmin):
@@ -28,8 +27,8 @@ class AdZoneAdmin(admin.ModelAdmin):
 
 
 class AdBaseAdmin(admin.ModelAdmin):
-    list_display = ['title', 'url', 'advertiser', 'since', 'updated', 'start_showing', 'stop_showing']
-    list_filter = ['updated', 'start_showing', 'stop_showing', 'since', 'updated']
+    list_display = ['title', 'url', 'advertiser', 'start_showing', 'stop_showing']
+    list_filter = ['updated', 'start_showing', 'stop_showing', 'sites']
     search_fields = ['title', 'url']
     raw_id_fields = ['advertiser']
 

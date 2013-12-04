@@ -9,6 +9,7 @@ import datetime
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
 from django.utils.translation import ugettext_lazy as _
 
 from adzone.managers import AdManager
@@ -31,7 +32,6 @@ class Advertiser(models.Model):
     company_name = models.CharField(
         verbose_name=_(u'Company Name'), max_length=255)
     website = models.URLField(verbose_name=_(u'Company Site'))
-    user = models.ForeignKey(User)
 
     class Meta:
         verbose_name = _(u'Ad Provider')
@@ -83,8 +83,8 @@ class AdBase(models.Model):
     """
     title = models.CharField(verbose_name=_(u'Title'), max_length=255)
     url = models.URLField(verbose_name=_(u'Advertised URL'))
-    since = models.DateTimeField(verbose_name=_(u'Since'), auto_now_add=True)
-    updated = models.DateTimeField(verbose_name=_(u'Updated'), auto_now=True)
+    since = models.DateTimeField(verbose_name=_(u'Created'), auto_now_add=True)
+    updated = models.DateTimeField(verbose_name=_(u'Last updated'), auto_now=True)
 
     start_showing = models.DateTimeField(verbose_name=_(u'Start showing'),
                                          default=now)
@@ -95,11 +95,10 @@ class AdBase(models.Model):
     advertiser = models.ForeignKey(Advertiser, verbose_name=_("Ad Provider"))
     category = models.ForeignKey(AdCategory, verbose_name=_("Category"))
     zone = models.ForeignKey(AdZone, verbose_name=_("Zone"))
+    sites = models.ManyToManyField(Site, verbose_name=(u"Sites"))
 
     # Our Custom Manager
     objects = AdManager()
-
-    sites = models.ManyToManyField(Site, verbose_name=(u"Sites"))
 
     class Meta:
         verbose_name = _('Ad Base')
