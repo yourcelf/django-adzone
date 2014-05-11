@@ -27,11 +27,10 @@ class AdZoneAdmin(admin.ModelAdmin):
 
 
 class AdBaseAdmin(admin.ModelAdmin):
-    list_display = ['title', 'url', 'advertiser', 'start_showing', 'stop_showing']
-    list_filter = ['updated', 'start_showing', 'stop_showing', 'sites']
+    list_display = ['title', 'url', 'advertiser', 'start_showing', 'stop_showing', 'is_showing']
+    list_filter = ['updated', 'start_showing', 'stop_showing', 'sites', 'advertiser']
     search_fields = ['title', 'url']
     raw_id_fields = ['advertiser']
-
 
 class AdClickAdmin(admin.ModelAdmin):
     search_fields = ['ad', 'source_ip']

@@ -104,6 +104,10 @@ class AdBase(models.Model):
     # Our Custom Manager
     objects = AdManager()
 
+    def is_showing(self):
+        current = now()
+        return "Yes" if self.start_showing < current < self.stop_showing else "No"
+
     class Meta:
         verbose_name = _('Ad Base')
         verbose_name_plural = _('Ad Bases')
