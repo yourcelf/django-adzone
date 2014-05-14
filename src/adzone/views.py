@@ -5,6 +5,8 @@
 # Please see the text file LICENCE for more information
 # If this script is distributed, it must be accompanied by the Licence
 
+import re
+
 from datetime import datetime
 
 from django.shortcuts import get_object_or_404
@@ -25,7 +27,7 @@ def ad_view(request, id):
     click.save()
 
     redirect_url = ad.url
-    if not redirect_url.startswith('http://'):
+    if not re.match("^https?:\/\/.*$", redirect_url):
         # Add http:// to the url so that the browser redirects correctly
         redirect_url = 'http://' + redirect_url
 
