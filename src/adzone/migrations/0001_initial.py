@@ -13,7 +13,6 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('company_name', self.gf('django.db.models.fields.CharField')(max_length=255)),
             ('website', self.gf('django.db.models.fields.URLField')(max_length=200)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
         ))
         db.send_create_signal('adzone', ['Advertiser'])
 
@@ -146,7 +145,6 @@ class Migration(SchemaMigration):
             'Meta': {'ordering': "('company_name',)", 'object_name': 'Advertiser'},
             'company_name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"}),
             'website': ('django.db.models.fields.URLField', [], {'max_length': '200'})
         },
         'adzone.adzone': {
