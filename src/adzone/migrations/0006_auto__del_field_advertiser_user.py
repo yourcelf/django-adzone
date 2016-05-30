@@ -8,15 +8,11 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Deleting field 'Advertiser.user'
-        db.delete_column(u'adzone_advertiser', 'user_id')
+        pass
 
 
     def backwards(self, orm):
-        # Adding field 'Advertiser.user'
-        db.add_column(u'adzone_advertiser', 'user',
-                      self.gf('django.db.models.fields.related.ForeignKey')(default=1, to=orm['auth.User']),
-                      keep_default=False)
+        pass
 
 
     models = {

@@ -63,7 +63,6 @@ class Migration(SchemaMigration):
             'Meta': {'ordering': "('company_name',)", 'object_name': 'Advertiser'},
             'company_name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"}),
             'website': ('django.db.models.fields.URLField', [], {'max_length': '200'})
         },
         u'adzone.adzone': {
