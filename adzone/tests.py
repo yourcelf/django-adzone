@@ -1,5 +1,4 @@
 from django.test import TestCase
-
 from django.contrib.sites.models import Site
 from django.template import Template
 from django.template.response import SimpleTemplateResponse
